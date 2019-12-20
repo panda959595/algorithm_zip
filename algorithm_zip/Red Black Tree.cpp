@@ -8,7 +8,7 @@ struct node {
 	node *left;
 	node *right;
 	node *parent;
-	int size;
+	int size;// 자기자신 포함 자식수
 };
 class RBtree {
 public:
@@ -167,7 +167,7 @@ public:
 		temp->parent = now;
 		temp->right = NIL;
 		temp->left = NIL;
-		temp->size = 0;
+		temp->size = 1;
 		push_restore(temp);
 	}
 	void pop(int num) {
@@ -298,6 +298,21 @@ public:
 		}
 		now->color = BLACK;
 	}
+	int rank(int num) {
+		node* now = root;
+		int ret = 0;
+		while (now->key != num) {
+			if (now->key > num) {
+				now = now->left;
+			}
+			else {
+				ret += (now->left)->size + 1;
+				now = now->right;
+			}
+		}
+		ret += (now->left)->size;
+		return ret;
+	}
 private:
 	node *root;
 	node *NIL;
@@ -309,6 +324,9 @@ int main() {
 	a.push(3);
 	a.push(4);
 	a.push(5);
+	for (int i = 1; i <= 5; i++) {
+		cout << a.rank(i) << endl;
+	}
 	a.pop(3);
 	a.pop(4);
 	a.pop(1);

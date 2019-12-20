@@ -329,6 +329,8 @@ private:
 	int len;
 };
 int main() {
-
+	big_int a = 1;
+	cout << a << endl;
+	system("pause");
 	return 0;
 }
