@@ -109,16 +109,16 @@ public:
 			else {//uncle is BLACK
 				if (now == (now->parent)->left) {
 					if (now->parent == gp->left) {
-						left_rotate(now->parent);
-						now = now->parent;
-					}
-					else {
 						(now->parent)->color = BLACK;
 						gp->color = RED;
 						right_rotate(gp);
 					}
+					else {
+						now = now->parent;
+						left_rotate(now);
+					}
 				}
-				else {//now is left child
+				else {//now is right child
 					if (now->parent == gp->left) {
 						right_rotate((now->parent)->parent);
 						now = gp;
@@ -319,19 +319,12 @@ private:
 };
 int main() {
 	RBtree a;
-	a.push(1);
-	a.push(2);
-	a.push(3);
-	a.push(4);
-	a.push(5);
-	for (int i = 1; i <= 5; i++) {
-		cout << a.rank(i) << endl;
+	int n;
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		int temp;
+		cin >> temp;
+		a.push(temp);
 	}
-	a.pop(3);
-	a.pop(4);
-	a.pop(1);
-	a.pop(5);
-	a.pop(2);
-	a.push(10);
 	return 0;
 }
