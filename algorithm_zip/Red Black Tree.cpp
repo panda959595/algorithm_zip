@@ -100,30 +100,30 @@ public:
 		}
 		while ((now->parent)->color == RED) {
 			node *gp = (now->parent)->parent;
-			if ((gp->left)->color == (gp->right)->color) {//parent and uncle is RED
+			if ((gp->left)->color == (gp->right)->color) {//uncle is RED
 				gp->left->color = BLACK;
 				gp->right->color = BLACK;
 				gp->color = RED;
 				now = gp;
 			}
 			else {//uncle is BLACK
-				if (now == (now->parent)->left) {
-					if (now->parent == gp->left) {
+				if (now == (now->parent)->left) {//now is left
+					if (now->parent == gp->left) {//parent is left
 						(now->parent)->color = BLACK;
 						gp->color = RED;
 						right_rotate(gp);
 					}
-					else {
+					else {//parent is right
 						now = now->parent;
-						left_rotate(now);
+						right_rotate(now);
 					}
 				}
 				else {//now is right child
-					if (now->parent == gp->left) {
-						right_rotate((now->parent)->parent);
-						now = gp;
+					if (now->parent == gp->left) {//parent is left
+						now = now->parent;
+						left_rotate(now);
 					}
-					else {
+					else {//parent is right
 						(now->parent)->color = BLACK;
 						gp->color = RED;
 						left_rotate(gp);
@@ -318,13 +318,6 @@ private:
 	node *NIL;
 };
 int main() {
-	RBtree a;
-	int n;
-	cin >> n;
-	for (int i = 0; i < n; i++) {
-		int temp;
-		cin >> temp;
-		a.push(temp);
-	}
+	
 	return 0;
 }
