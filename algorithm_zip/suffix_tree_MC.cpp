@@ -3,79 +3,110 @@
 using namespace std;
 struct node {
 	int s, e;//가르키는 문자열 시작, 끝
-	node* left_sibling;//형제 노드
-	node* right_sibling;
+	node* next_sibling;//형제 노드
+	node* pre_sibling;
 	node* child;//자식 노드
 	node* parent;//부모 노드
 	node* suffix_link;//xa->a
 	node() {
 		parent = NULL;
-		left_sibling = NULL;
-		right_sibling = NULL;
+		next_sibling = NULL;
+		pre_sibling = NULL;
 		child = NULL;
 		suffix_link = NULL;
 	}
+};
+struct String {
+	int s, e;
 };
 int main() {
 	string str;//입력 문자열
 	cin >> str;//길이 n
 	str += "$";
 	cout << str << endl;
+	int len = str.length();
 	node* root = new node;
-	node* temp = new node;
-	//1~n suffix 입력
-	temp->s = 0;
-	temp->e = str.length() - 1;
-	root->child = temp;
-	temp->parent = root;
-	node* now;//현재 이동중
-	node* head_locus = root;//전 단계 contracted locus of head
-	int head_s = -1, head_e = -2;//전 단계 head
-	int x;//-1 : NULL
-	int a_s, a_e;
-	int b_s, b_e;
-	int c_s, c_e;
-	int index;//현재단계 suffix
-	int head_index;//전 단계 head suffix
-	for (int i = 1; i < str.length(); i++) {
-		index = i;
-		b_s = head_s;
-		b_e = head_e;
-		if (head_s <= head_e) {//head not null
-			b_s++;
-		}
-		//step A
-		if (head_locus == root) {
-			now = head_locus;
-		}
-		else {
-			now = head_locus->suffix_link;
-			b_s = now->e + 1;
-		}
-		head_s = i;
-		//step B
-		while (1) {
-			if (b_e - b_s > (now->child->e) - (now->child->s)) {
-				b_s = now->child->e + 1;
-				now = now->child;
-			}
-			else if (b_e - b_s == (now->child->e) - (now->child->s)) {
-				now = now->child;
-				c_s = now->s;
-				head_locus->suffix_link = now;
-				c_e = c_s;
-				index += now->e;
-				//step C
+	node* new_node = new node;
+	new_node->s = 0;
+	new_node->e = len - 1;
+	new_node->parent = root;
+	root->child = new_node;
+	String x, a, b, c;
+	String head_now;
+	String head_pre;
+	node* head_pre_contracted_locus;
+	node* now;
+	int step_flag;//0 1 2
+	step_flag = 2;
+	now = root;
+	for (int i = 1; i < len; i++) {
+		head_now.s = i;
+		head_now.e = i;
+		if (step_flag == 0) {
 
-				break;
-			}
-			else {
-				//step C
-
-			}
 		}
-		temp = new node;
-		temp->parent = now;
+		if (step_flag == 1) {
+
+		}
+		if (step_flag == 2) {
+			node* child_temp;
+			while (1) {
+				child_temp = now->child;
+				bool end_flag = false;
+				while (str[child_temp->s] != str[head_now.e]) {
+					if (child_temp->next_sibling == NULL) {
+						end_flag = true;
+						break;
+					}
+					child_temp = child_temp->next_sibling;
+				}
+				if (end_flag) {
+					break;
+				}
+				for (int i = child_temp->s; i <= child_temp->e; i++) {
+					if (str[i] != str[head_now.e]) {
+						end_flag = true;
+						break;
+					}
+					head_now.e++;
+				}
+				if (end_flag) {
+					break;
+				}
+				now = child_temp;
+			}
+			new_node = new node;
+			if (child_temp->pre_sibling == NULL) {//첫째자식에 넣을때
+				new_node->s = child_temp->s;
+				new_node->e = child_temp->s + head_now.e - head_now.s + 1;
+				child_temp->s = child_temp->s + head_now.e - head_now.s + 2;
+				new_node->child = child_temp;
+				new_node->parent = child_temp->parent;
+				new_node->next_sibling = child_temp->next_sibling;
+				child_temp->parent->child = new_node;
+				child_temp->parent = new_node;
+				child_temp->next_sibling = NULL;
+			}
+			else {//형제사이에 넣을때
+				new_node->s = child_temp->s;
+				new_node->e = child_temp->s + head_now.e - head_now.s + 1;
+				child_temp->s = child_temp->s + head_now.e - head_now.s + 2;
+				new_node->next_sibling = child_temp->next_sibling;
+				new_node->pre_sibling = child_temp->next_sibling;
+				new_node->child = child_temp;
+				child_temp->pre_sibling->next_sibling = new_node;
+				if (child_temp->next_sibling != NULL) {
+					child_temp->next_sibling->pre_sibling = new_node;
+				}
+				child_temp->pre_sibling = child_temp->next_sibling = NULL;
+			}
+			new_node = new node;
+			new_node->s = head_now.e + 1;
+			new_node->e = len - 1;
+			new_node->pre_sibling = child_temp;
+			child_temp->next_sibling = new_node;
+		}
+
 	}
 	return 0;
 }
