@@ -34,7 +34,7 @@ int main() {
 	String x, a, b, c;
 	String head_now;
 	String head_pre;
-	node* head_pre_contracted_locus;
+	node* head_pre_contracted_locus = NULL;
 	node* now;
 	int step_flag;//0 1 2
 	now = root;
@@ -110,9 +110,12 @@ int main() {
 					new_node->e = len - 1;
 					new_node->pre_sibling = child_temp;
 					child_temp->next_sibling = new_node;
+					head_pre_contracted_locus = now;
 					step_flag = 0;
+					break;
 				}
 			}
+			head_pre_contracted_locus->suffix_link = now;
 		}
 		if (step_flag == 2) {//step C
 			node* child_temp;
@@ -172,6 +175,7 @@ int main() {
 			new_node->e = len - 1;
 			new_node->pre_sibling = child_temp;
 			child_temp->next_sibling = new_node;
+			head_pre_contracted_locus = now;
 		}
 
 		//x a b ∞·¡§
