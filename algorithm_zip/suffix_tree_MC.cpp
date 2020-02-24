@@ -46,7 +46,7 @@ int main() {
 		if (head_pre.e - head_pre.s < 0) {
 			step_flag = 2;
 		}
-		if (step_flag == 0) {
+		if (step_flag == 0) {//step A
 			if (a.e - a.s < 0) {
 				now = root;
 			}
@@ -62,7 +62,7 @@ int main() {
 			head_now.e += x.e - x.s + 1;
 			head_now.e += a.e - a.s + 1;
 		}
-		if (step_flag == 1) {
+		if (step_flag == 1) {//step B
 			node* child_temp;
 			while (1) {
 				child_temp = now->child;
@@ -74,11 +74,47 @@ int main() {
 					now = child_temp;
 				}
 				else if (b.e - b.s == child_temp->e - child_temp->s) {
-
+					now = child_temp;
+					step_flag = 2;
+					break;
+				}
+				else {
+					new_node = new node;
+					if (child_temp->pre_sibling == NULL) {//첫째자식에 넣을때
+						new_node->s = child_temp->s;
+						new_node->e = child_temp->s + b.e - b.s + 1;
+						child_temp->s = new_node->e + 1;
+						new_node->child = child_temp;
+						new_node->parent = child_temp->parent;
+						new_node->next_sibling = child_temp->next_sibling;
+						child_temp->parent->child = new_node;
+						child_temp->parent = new_node;
+						child_temp->next_sibling = NULL;
+					}
+					else {//형제사이에 넣을때
+						new_node->s = child_temp->s;
+						new_node->e = child_temp->s + b.e - b.s + 1;
+						child_temp->s = new_node->e + 1;
+						new_node->next_sibling = child_temp->next_sibling;
+						new_node->pre_sibling = child_temp->next_sibling;
+						new_node->child = child_temp;
+						child_temp->pre_sibling->next_sibling = new_node;
+						if (child_temp->next_sibling != NULL) {
+							child_temp->next_sibling->pre_sibling = new_node;
+						}
+						child_temp->pre_sibling = child_temp->next_sibling = NULL;
+					}
+					now = new_node;
+					new_node = new node;
+					new_node->s = now->e + 1;
+					new_node->e = len - 1;
+					new_node->pre_sibling = child_temp;
+					child_temp->next_sibling = new_node;
+					step_flag = 0;
 				}
 			}
 		}
-		if (step_flag == 2) {
+		if (step_flag == 2) {//step C
 			node* child_temp;
 			while (1) {
 				child_temp = now->child;
