@@ -54,7 +54,7 @@ int main() {
 	new_node->s = 0;
 	new_node->e = len - 1;
 	new_node->parent = root;
-	root->child = new_node;
+	root->child.push_back(new_node);
 	String x, a, b, c;
 	String head_now;
 	String head_pre;
@@ -111,6 +111,9 @@ int main() {
 					new_node = new node;
 					new_node->s = now->e + 1;
 					new_node->e = len - 1;
+					new_node->parent = now;
+					now->child.push_back(new_node);
+					sort(now->child.begin(), now->child.end(), bigyo);
 					head_pre_contracted_locus = now;
 					step_flag = 0;
 					break;
@@ -122,18 +125,23 @@ int main() {
 			node* child_temp;
 			while (1) {
 				// child_temp가 존재 안 할수도
-				child_temp = now->child;
-				bool end_flag = false;
-				while (str[child_temp->s] != str[head_now.e]) {
-					if (child_temp->next_sibling == NULL) {
-						end_flag = true;
+				child_temp = NULL;
+				for (auto k : now->child) {
+					if (str[head_now.e] == str[k->s]) {
+						child_temp = k;
 						break;
 					}
-					child_temp = child_temp->next_sibling;
 				}
-				if (end_flag) {
+				if (child_temp == NULL) {
+					new_node = new node;
+					new_node->s = head_now.e;
+					new_node->e = len - 1;
+					new_node->parent = now;
+					now->child.push_back(new_node);
+					sort(now->child.begin(), now->child.end(), bigyo);
 					break;
 				}
+				bool end_flag = false;
 				for (int i = child_temp->s; i <= child_temp->e; i++) {
 					if (str[i] != str[head_now.e]) {
 						end_flag = true;
@@ -142,48 +150,24 @@ int main() {
 					head_now.e++;
 				}
 				if (end_flag) {
+					new_node = new node;
+					insert_node(new_node, child_temp, head_now.e - child_temp->s);
+					now = new_node;
+					new_node = new node;
+					new_node->s = head_now.e;
+					new_node->e = len - 1;
+					new_node->parent = now;
+					now->child.push_back(new_node);
+					sort(now->child.begin(), now->child.end(), bigyo);
+					head_pre_contracted_locus = now;
+					step_flag = 0;
 					break;
 				}
 				now = child_temp;
 			}
-			new_node = new node;//head_now
-			if (child_temp->pre_sibling == NULL) {//첫째자식에 넣을때
-				new_node->s = child_temp->s;
-				new_node->e = child_temp->s + head_now.e - head_now.s + 1;
-				child_temp->s = child_temp->s + head_now.e - head_now.s + 2;
-				new_node->child = child_temp;
-				new_node->parent = child_temp->parent;
-				new_node->next_sibling = child_temp->next_sibling;
-				child_temp->parent->child = new_node;
-				child_temp->parent = new_node;
-				child_temp->next_sibling = NULL;
-			}
-			else {//형제사이에 넣을때
-				new_node->s = child_temp->s;
-				new_node->e = child_temp->s + head_now.e - head_now.s + 1;
-				child_temp->s = child_temp->s + head_now.e - head_now.s + 2;
-				new_node->next_sibling = child_temp->next_sibling;
-				new_node->pre_sibling = child_temp->next_sibling;
-				new_node->child = child_temp;
-				child_temp->pre_sibling->next_sibling = new_node;
-				if (child_temp->next_sibling != NULL) {
-					child_temp->next_sibling->pre_sibling = new_node;
-				}
-				child_temp->pre_sibling = child_temp->next_sibling = NULL;
-			}
-			now = new_node;
-			new_node = new node;
-			new_node->s = head_now.e + 1;
-			new_node->e = len - 1;
-			new_node->pre_sibling = child_temp;
-			child_temp->next_sibling = new_node;
-			head_pre_contracted_locus = now;
 		}
 
 		//x a b 결정
-		while (now->pre_sibling != NULL) {
-			now = now->pre_sibling;
-		}
 		now = now->parent;
 		//x
 		if (head_now.e - head_now.s < 0) {
