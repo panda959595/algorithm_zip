@@ -2,15 +2,20 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <stack>
+#include <list>
 using namespace std;
 struct node {
 	int s, e;//가르키는 문자열 시작, 끝
-	vector<node*> child;
+	int index;
+	list<node*> child;
 	node* parent;//부모 노드
 	node* suffix_link;//xa->a
+	bool check;
 	node() {
 		parent = NULL;
 		suffix_link = NULL;
+		check = false;
 	}
 };
 struct String {
@@ -40,13 +45,23 @@ void insert_node(node* new_node, node* temp_node, int size) {
 	temp_node->s = new_node->e + 1;
 	new_node->child.push_back(temp_node);
 	new_node->parent = temp_node->parent;
-	temp_node->parent->child.push_back(new_node);
-	sort(temp_node->parent->child.begin(), temp_node->parent->child.end(), bigyo);
+	bool flag = true;
+	for (list<node*>::iterator ite = temp_node->parent->child.begin(); ite != temp_node->parent->child.end(); ite++) {
+		if (!bigyo(*ite, new_node)) {
+			temp_node->parent->child.insert(ite, new_node);
+			flag = false;
+			break;
+		}
+	}
+	if (flag) {
+		temp_node->parent->child.insert(temp_node->parent->child.end(), new_node);
+	}
+	temp_node->parent->child.remove(temp_node);
 	temp_node->parent = new_node;
 }
 int main() {
 	cin >> str;//길이 n
-	str += "$";
+	str += "~";
 	cout << str << endl;
 	int len = str.length();
 	node* root = new node;
@@ -54,6 +69,7 @@ int main() {
 	new_node->s = 0;
 	new_node->e = len - 1;
 	new_node->parent = root;
+	new_node->index = 0;
 	root->child.push_back(new_node);
 	String x, a, b, c;
 	String head_now;
@@ -64,10 +80,11 @@ int main() {
 	now = root;
 	head_pre.s = 1;
 	head_pre.e = 0;
-	for (int i = 1; i < len; i++) {
-		head_now.s = i;
+	for (int i = 1; i < len - 1; i++) {
+ 		head_now.s = i;
 		head_now.e = i;
 		if (head_pre.e - head_pre.s < 0) {
+			now = root;
 			step_flag = 2;
 		}
 		if (step_flag == 0) {//step A
@@ -108,12 +125,14 @@ int main() {
 					new_node = new node;
 					insert_node(new_node, child_temp, b.e - b.s + 1);
 					now = new_node;
-					new_node = new node;
-					new_node->s = now->e + 1;
-					new_node->e = len - 1;
-					new_node->parent = now;
-					now->child.push_back(new_node);
-					sort(now->child.begin(), now->child.end(), bigyo);
+					if (now->e != len - 1) {
+						new_node = new node;
+						new_node->s = now->e + 1;
+						new_node->e = len - 1;
+						new_node->parent = now;
+						now->child.push_back(new_node);
+					}
+					new_node->index = i;
 					head_pre_contracted_locus = now;
 					step_flag = 0;
 					break;
@@ -136,9 +155,20 @@ int main() {
 					new_node = new node;
 					new_node->s = head_now.e;
 					new_node->e = len - 1;
-					new_node->parent = now;
-					now->child.push_back(new_node);
-					sort(now->child.begin(), now->child.end(), bigyo);
+					new_node->parent = now; 
+					bool flag = true;
+					for (list<node*>::iterator ite = now->child.begin(); ite != now->child.end(); ite++) {
+						if (!bigyo(*ite, new_node)) {
+							now->child.insert(ite, new_node);
+							flag = false;
+							break;
+						}
+					}
+					new_node->index = i;
+					if (flag) {
+						now->child.insert(now->child.end(), new_node);
+					}
+					now = new_node;
 					break;
 				}
 				bool end_flag = false;
@@ -151,14 +181,26 @@ int main() {
 				}
 				if (end_flag) {
 					new_node = new node;
-					insert_node(new_node, child_temp, head_now.e - child_temp->s);
+					insert_node(new_node, child_temp, head_now.e - head_now.s);
 					now = new_node;
-					new_node = new node;
-					new_node->s = head_now.e;
-					new_node->e = len - 1;
-					new_node->parent = now;
-					now->child.push_back(new_node);
-					sort(now->child.begin(), now->child.end(), bigyo);
+					if (now->e != len - 1) {
+						new_node = new node;
+						new_node->s = head_now.e;
+						new_node->e = len - 1;
+						new_node->parent = now;
+						bool flag = true;
+						for (list<node*>::iterator ite = now->child.begin(); ite != now->child.end(); ite++) {
+							if (!bigyo(*ite, new_node)) {
+								now->child.insert(ite, new_node);
+								flag = false;
+								break;
+							}
+						}
+						if (flag) {
+							now->child.insert(now->child.end(), new_node);
+						}
+					}
+					new_node->index = i;
 					head_pre_contracted_locus = now;
 					step_flag = 0;
 					break;
@@ -166,7 +208,6 @@ int main() {
 				now = child_temp;
 			}
 		}
-
 		//x a b 결정
 		now = now->parent;
 		//x
@@ -192,6 +233,36 @@ int main() {
 		b.s += x.e - x.s + 1;
 		b.s += a.e - a.s + 1;
 	}
-
+	now = root;
+	stack<node*> sta;
+	sta.push(now);
+	root->check = true;
+	while (!sta.empty()) {
+		node* now = sta.top();
+		if (now->child.size() == 0) {
+			sta.pop();
+			continue;
+		}
+		list<node*>::iterator ite = now->child.end();
+		ite--;
+		if ((*ite)->s == len - 1 && !((*ite)->check)) {
+			(*ite)->check = true;
+			cout << (*ite)->index<<" ";
+		}
+		for (auto k : now->child) {
+			if (k->check) {
+				continue;
+			}
+			k->check = true;
+			if (k->index >= 0) {
+				cout << k->index << " ";
+			}
+			sta.push(k);
+			break;
+		}
+		if (sta.top() == now) {
+			sta.pop();
+		}
+	}
 	return 0;
 }
