@@ -1,26 +1,50 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <algorithm>
 using namespace std;
 struct node {
 	int s, e;//가르키는 문자열 시작, 끝
-	node* next_sibling;//형제 노드
-	node* pre_sibling;
-	node* child;//자식 노드
+	vector<node*> child;
 	node* parent;//부모 노드
 	node* suffix_link;//xa->a
 	node() {
 		parent = NULL;
-		next_sibling = NULL;
-		pre_sibling = NULL;
-		child = NULL;
 		suffix_link = NULL;
 	}
 };
 struct String {
 	int s, e;
 };
+string str;//입력 문자열
+bool bigyo(node* a, node* b) {
+	int i = a->s;
+	int j = b->s;
+	while (1) {
+		if (i > a->e) {
+			return true;
+		}
+		if (j > b->e) {
+			return false;
+		}
+		if (str[i] != str[j]) {
+			return str[i] < str[j];
+		}
+		i++;
+		j++;
+	}
+}
+void insert_node(node* new_node, node* temp_node, int size) {
+	new_node->s = temp_node->s;
+	new_node->e = new_node->s + size - 1;
+	temp_node->s = new_node->e + 1;
+	new_node->child.push_back(temp_node);
+	new_node->parent = temp_node->parent;
+	temp_node->parent->child.push_back(new_node);
+	sort(temp_node->parent->child.begin(), temp_node->parent->child.end(), bigyo);
+	temp_node->parent = new_node;
+}
 int main() {
-	string str;//입력 문자열
 	cin >> str;//길이 n
 	str += "$";
 	cout << str << endl;
@@ -63,11 +87,13 @@ int main() {
 			head_now.e += a.e - a.s + 1;
 		}
 		if (step_flag == 1) {//step B
-			node* child_temp;
 			while (1) {
-				child_temp = now->child;
-				while (str[child_temp->s] != str[b.s]) {
-					child_temp = child_temp->next_sibling;
+				node* child_temp = NULL;// child_temp가 무조건 존재
+				for (auto k : now->child) {
+					if (str[b.s] == str[k->s]) {
+						child_temp = k;
+						break;
+					}
 				}
 				if (b.e - b.s > child_temp->e - child_temp->s) {
 					b.s = child_temp->e + 1;
@@ -80,36 +106,11 @@ int main() {
 				}
 				else {
 					new_node = new node;
-					if (child_temp->pre_sibling == NULL) {//첫째자식에 넣을때
-						new_node->s = child_temp->s;
-						new_node->e = child_temp->s + b.e - b.s + 1;
-						child_temp->s = new_node->e + 1;
-						new_node->child = child_temp;
-						new_node->parent = child_temp->parent;
-						new_node->next_sibling = child_temp->next_sibling;
-						child_temp->parent->child = new_node;
-						child_temp->parent = new_node;
-						child_temp->next_sibling = NULL;
-					}
-					else {//형제사이에 넣을때
-						new_node->s = child_temp->s;
-						new_node->e = child_temp->s + b.e - b.s + 1;
-						child_temp->s = new_node->e + 1;
-						new_node->next_sibling = child_temp->next_sibling;
-						new_node->pre_sibling = child_temp->next_sibling;
-						new_node->child = child_temp;
-						child_temp->pre_sibling->next_sibling = new_node;
-						if (child_temp->next_sibling != NULL) {
-							child_temp->next_sibling->pre_sibling = new_node;
-						}
-						child_temp->pre_sibling = child_temp->next_sibling = NULL;
-					}
+					insert_node(new_node, child_temp, b.e - b.s + 1);
 					now = new_node;
 					new_node = new node;
 					new_node->s = now->e + 1;
 					new_node->e = len - 1;
-					new_node->pre_sibling = child_temp;
-					child_temp->next_sibling = new_node;
 					head_pre_contracted_locus = now;
 					step_flag = 0;
 					break;
@@ -120,6 +121,7 @@ int main() {
 		if (step_flag == 2) {//step C
 			node* child_temp;
 			while (1) {
+				// child_temp가 존재 안 할수도
 				child_temp = now->child;
 				bool end_flag = false;
 				while (str[child_temp->s] != str[head_now.e]) {
