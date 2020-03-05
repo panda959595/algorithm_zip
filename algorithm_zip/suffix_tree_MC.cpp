@@ -74,6 +74,7 @@ void func(string input) {
 	new_node->parent = root;
 	new_node->index = 0;
 	root->child.push_back(new_node);
+	root->parent = root;
 	String x, a, b, c;
 	String head_now;
 	String head_pre;
@@ -91,21 +92,22 @@ void func(string input) {
 	for (int i = 1; i < len - 1; i++) {
 		step_flag = 0;
 		if (step_flag == 0) {//step A
-			if (head_pre_contracted_locus == root) {
+			head_now.s = i;
+			head_now.e = i - 1;
+			if (a.e - a.s < 0) {
 				now = root;
 			}
 			else {
 				now = head_pre_contracted_locus->suffix_link;
+				head_now.e += a.e - a.s + 1;
 			}
 			if (b.e - b.s < 0) {
 				step_flag += 2;
-				head_pre_locus->suffix_link = root;
+				head_pre_locus->suffix_link = now;
 			}
 			else {
 				step_flag++;
 			}
-			head_now.s = i;
-			head_now.e = i + a.e - a.s;
 		}
 		if (step_flag == 1) {//step B
 			while (1) {
@@ -124,6 +126,7 @@ void func(string input) {
 					now = child_temp;
 					step_flag = 2;
 					head_now.e = b.e;
+					head_pre_locus->suffix_link = now;
 					break;
 				}
 				else {
@@ -151,11 +154,11 @@ void func(string input) {
 					head_pre_contracted_locus = now->parent;
 					step_flag = 0;
 					head_now.e = b.e;
+					head_pre_locus->suffix_link = now;
+					head_pre_locus = now;
 					break;
 				}
 			}
-			head_pre_locus->suffix_link = now;
-			head_pre_locus = now;
 		}
 		if (step_flag == 2) {//step C
 			node* child_temp;
@@ -242,7 +245,7 @@ void func(string input) {
 			x.s = x.e = head_now.s;
 		}
 		//a
-		if (head_pre_contracted_locus == root) {
+		if (now == root) {
 			a.s = 1;
 			a.e = 0;
 		}
