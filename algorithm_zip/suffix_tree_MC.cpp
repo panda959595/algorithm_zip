@@ -23,6 +23,7 @@ struct String {
 	int s, e;
 };
 string str;//입력 문자열
+stack<node*> sta;
 bool bigyo(node* a, node* b) {
 	int i = a->s;
 	int j = b->s;
@@ -109,6 +110,7 @@ void func(string input) {
 				step_flag++;
 			}
 		}
+		bool contracted_flag = true;
 		if (step_flag == 1) {//step B
 			while (1) {
 				node* child_temp = NULL;// child_temp가 무조건 존재
@@ -173,6 +175,7 @@ void func(string input) {
 				}
 				if (child_temp == NULL) {
 					if (head_now.e == len - 1) {
+						contracted_flag = false;
 						break;
 					}
 					new_node = new node;
@@ -193,21 +196,23 @@ void func(string input) {
 					}
 					now = new_node;
 					head_pre_locus = now;
-					head_pre_contracted_locus = now->parent;
+					head_pre_contracted_locus = now->parent;////////////////////수정요망
 					break;
 				}
 				bool end_flag = false;
 				int start_temp = head_now.e + 1;
+				int len_temp = 0;
 				for (int j = child_temp->s; j <= child_temp->e; j++) {
 					if (str[j] != str[head_now.e + 1]) {
 						end_flag = true;
 						break;
 					}
 					head_now.e++;
+					len_temp++;
 				}
 				if (end_flag) {
 					new_node = new node;
-					insert_node(new_node, child_temp, head_now.e - head_now.s + 1);
+					insert_node(new_node, child_temp, len_temp);
 					now = new_node;
 					if (now->e != len - 1) {
 						new_node = new node;
@@ -235,7 +240,9 @@ void func(string input) {
 			}
 		}
 		//x a b 결정
-		now = now->parent;
+		if (contracted_flag) {
+			now = now->parent;
+		}
 		//x
 		if (head_now.e - head_now.s < 0) {
 			x.s = 1;
@@ -245,7 +252,7 @@ void func(string input) {
 			x.s = x.e = head_now.s;
 		}
 		//a
-		if (now == root) {
+		if (head_pre_contracted_locus == root) {
 			a.s = 1;
 			a.e = 0;
 		}
@@ -261,7 +268,6 @@ void func(string input) {
 		head_pre = head_now;
 	}
 	now = root;
-	stack<node*> sta;
 	sta.push(now);
 	root->check = true;
 	while (!sta.empty()) {
@@ -291,7 +297,7 @@ void func(string input) {
 			break;
 		}
 		if (sta.top() == now) {
-			delete now;
+			//delete now;
 			sta.pop();
 		}
 	}
@@ -333,6 +339,7 @@ void test_func() {
 			break;
 		}
 		out << endl;
+
 		cout << "corret " << i << endl;
 	}
 	if (!flag) {
@@ -340,7 +347,7 @@ void test_func() {
 	}
 }
 int main() {
-	//input_func();
-	test_func();
+	input_func();
+	//test_func();
 	return 0;
 }
