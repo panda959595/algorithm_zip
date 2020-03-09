@@ -79,6 +79,7 @@ void func(string input) {
 	String x, a, b, c;
 	String head_now;
 	String head_pre;
+	String head_pre_contracted;
 	node* head_pre_contracted_locus = root;
 	node* head_pre_locus = root;
 	node* now;
@@ -104,7 +105,7 @@ void func(string input) {
 			}
 			if (b.e - b.s < 0) {
 				step_flag += 2;
-				head_pre_locus->suffix_link = now;
+				//head_pre_locus->suffix_link = now;
 			}
 			else {
 				step_flag++;
@@ -115,7 +116,7 @@ void func(string input) {
 			while (1) {
 				node* child_temp = NULL;// child_temp가 무조건 존재
 				for (auto k : now->child) {
-					if (str[b.s] == str[k->s]) {
+ 					if (str[b.s] == str[k->s]) {
 						child_temp = k;
 						break;
 					}
@@ -194,7 +195,7 @@ void func(string input) {
 					if (flag) {
 						now->child.insert(now->child.end(), new_node);
 					}
-					now = new_node;
+					//now = new_node;
 					head_pre_locus = now;
 					head_pre_contracted_locus = now->parent;////////////////////수정요망
 					break;
@@ -240,8 +241,10 @@ void func(string input) {
 			}
 		}
 		//x a b 결정
+		head_pre_contracted = head_now;
 		if (contracted_flag) {
-			now = now->parent;
+			//now = now->parent;
+			head_pre_contracted.e -= now->e - now->s + 1;
 		}
 		//x
 		if (head_now.e - head_now.s < 0) {
@@ -257,8 +260,8 @@ void func(string input) {
 			a.e = 0;
 		}
 		else {
-			a.s = now->s + x.e - x.s + 1;
-			a.e = now->e;
+			a.s = head_pre_contracted.s + x.e - x.s + 1;
+			a.e = head_pre_contracted.e;
 		}
 		//b
 		b.e = head_now.e;
@@ -320,7 +323,7 @@ void test_func() {
 	in >> t;
 	bool flag;
 	for (int i = 0; i < t; i++) {
-		in >> n;
+ 		in >> n;
 		in >> input;
 		ans.clear();
 		func(input);
@@ -347,7 +350,7 @@ void test_func() {
 	}
 }
 int main() {
-	input_func();
-	//test_func();
+	//input_func();
+	test_func();
 	return 0;
 }
