@@ -36,5 +36,8 @@
     <ClCompile Include="suffix_tree_MC.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="suffix array_karkkainen.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
