@@ -7,7 +7,7 @@ vector<int> getpi(string pattern) {
 	vector<int> pi(pattern.length(), 0);
 	for (int i = 1; i < pattern.length(); i++) {
 		if (j > 0 && pattern[i] != pattern[j]) {
-			j = pi[j];
+			j = pi[j - 1];
 		}
 		if (pattern[i] == pattern[j]) {
 			pi[i] = ++j;
